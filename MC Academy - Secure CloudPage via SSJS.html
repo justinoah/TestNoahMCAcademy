@@ -10,7 +10,7 @@
     /*Check for referrer domain*/
      
     SET @referrer = HTTPRequestHeader("Referer")
-    IF indexOf(@referrer, "https://mc.s7.exacttarget.com/cloud/#app/CloudPages/") != "1"
+    IF indexOf(@referrer, "mc.s7.exacttarget.com") != "1"
     THEN Redirect("https://google.com") ENDIF
     ]%%
 </body>
