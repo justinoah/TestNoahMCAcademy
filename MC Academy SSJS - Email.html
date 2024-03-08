@@ -1,0 +1,100 @@
+<html>
+
+<body>
+    <script runat="server" langauge="Javascript">
+        Platform.Load("core", "1.1.1");
+
+        var customerID = Attribute.GetValue("customer_id"),
+            authUrl = "https://mc4fr7rnvdyszcxppqbhvywvjcd4.auth.marketingcloudapis.com/v2/token",
+            authPayload = {
+                grant_type: "client_credentials",
+                client_id: "85vwzzqw20vitrwq76wwt1uk",
+                client_secret: "TYYp4VghVaqdJiYcveGZYLms"
+            };
+
+
+        var getFirstName = getFirstNameField(customerID),
+            getTotQuantity = getTotalQuantity(customerID),
+            retAuthToken = retrieveAuthToken(authUrl, authPayload),
+            journeyNames = getJourneyNames(retAuthToken);
+
+        Write(retAuthToken + '<br />');
+        Write(journeyNames);
+
+        //Function to get the First Name Field from the Customer Info Data Extension based on the Customer ID
+        function getFirstNameField(custId) {
+            var customerID = custId;
+            var firstName =
+                Platform.Function.Lookup('KAWI_CustomerInfo_CocaCola', 'first_name', 'customer_id', customerID);
+
+            Variable.SetValue("@FirstName", firstName);
+
+            return firstName;
+        }
+
+        //Function to get the Total Quantity from each of the customer's orders in the Orders Data Extension
+        function getTotalQuantity(custId) {
+            var customerID = custId;
+            var firstName =
+                Platform.Function.Lookup('KAWI_CustomerInfo_CocaCola', 'first_name', 'customer_id', customerID);
+
+            Variable.SetValue("@FirstName", firstName);
+
+            var totalQuantity = 0;
+
+            var dataRows = Platform.Function.LookupRows('KAWI_Order_CocaCola', 'Customer_ID', customerID);
+            if (dataRows && dataRows.length > 0) {
+                for (var i = 0; i < dataRows.length; i++) {
+                    var quantity = dataRows[i]["Quantity"];
+                    totalQuantity += quantity;
+                }
+                Variable.SetValue("@TotalQuantity", totalQuantity);
+            }
+
+            return totalQuantity;
+        }
+
+        //Function to get the Auth Token for a REST API Call
+        function retrieveAuthToken(url, payloadData) {
+            var authUrl = url,
+                headerContentType = "application/json",
+                payload = payloadData;
+
+            var authApiCall = HTTP.Post(authUrl, headerContentType, Stringify(payload), [], []),
+                authToken = Platform.Function.ParseJSON(authApiCall.Response[0]).access_token;
+
+            return authToken;
+        }
+
+        //Function to get All Journey Names
+        function getJourneyNames(token) {
+            var authToken = token,
+                restUrl = "https://mc4fr7rnvdyszcxppqbhvywvjcd4.rest.marketingcloudapis.com/interaction/v1/interactions",
+                headerNames = ["Accept", "Authorization"],
+                headerValues = ["*/*", "Bearer " + authToken],
+                getResponse = HTTP.Get(restUrl, headerNames, headerValues);
+
+                return Stringify(getResponse);
+        }
+
+    </script>
+    <p>
+        Hello %%=v(@FirstName)=%%, You have ordered %%=v(@TotalQuantity)=%% Coca-Cola %%=v(@word)=%%. Thank you!
+    </p>
+    <table cellpadding="2" cellspacing="0" width="600" ID="Table5" Border=0>
+        <tr>
+            <td>
+                <font face="verdana" size="1" color="#444444">This email was sent by:
+                    <b>%%Member_Busname%%
+                    </b>
+                    <br>%%Member_Addr%% %%Member_City%%, %%Member_State%%, %%Member_PostalCode%%, %%Member_Country%%
+                    <br>
+                    <br>
+                </font>
+            </td>
+        </tr>
+    </table>
+    <a href="%%profile_center_url%%" alias="Update Profile">Update Profile</a>
+</body>
+
+</html>

@@ -1,0 +1,76 @@
+<html>
+
+<body>
+    <script runat="server" language="Javascript">
+        Platform.Load("core", "1.1.1");
+        var api = new Script.Util.WSProxy();
+
+        retrieveAutomationStatus();
+    
+        function retrieveAutomationStatus() {
+
+            var columns = ["Name", "Customer Key", "Status"];
+            var filter = {
+                Property: "Name",
+                SimpleOperator: "equals",
+                Value: "REVIEW CAMPAINGN 2"
+            };
+            var request = api.retrieve("Automation", columns, filter);
+            var status = request.Results[0].Status;
+            var automationStatus = "";
+            switch (status) {
+                case -1:
+                    automationStatus = "Error";
+                    break;
+
+                case 0:
+                    automationStatus = "Building Error";
+                    break;
+
+                case 1:
+                    automationStatus = "Building";
+                    break;
+
+                case 2:
+                    automationStatus = "Ready";
+                    break;
+
+                case 3:
+                    automationStatus = "Running";
+                    break;
+
+                case 4:
+                    automationStatus = "Paused";
+                    break;
+
+                case 5:
+                    automationStatus = "Stopped";
+                    break;
+
+                case 6:
+                    automationStatus = "Scheduled";
+                    break;
+
+                case 7:
+                    automationStatus = "Awaiting Trigger";
+                    break;
+
+                case 8:
+                    automationStatus = "Inactive Trigger";
+                    break;
+
+                default:
+                    automationStatus = "Status Not Available";
+                    break;
+            }
+            Variable.SetValue("@variable", automationStatus);
+        }
+    </script>
+
+    <p>
+        This is the Automation status: %%=v(@variable)=%%
+    </p>
+
+</body>
+
+</html>

@@ -1,0 +1,204 @@
+<html>
+
+<body>
+    <script runat="server" language="Javascript">
+        Platform.Load("core", "1.1.1");
+
+        var wsprox = new Script.Util.WSProxy();
+
+        var autNames = getAutomationNames();
+        //var createAutRecordsDE = createAutRecords();
+        var upsertAutRecordsDE = upsertRecord();
+
+        //Function to get All Automation Names
+        function getAutomationNames() {
+            var automations = [],
+                moreData = true,
+                reqID = data = null;
+
+            var cols = [
+                "Name",
+                "Status"
+            ];
+
+            var filter = {
+                Property: 'Status',
+                SimpleOperator: 'IN',
+                Value: [-1, 0, 1, 2, 3, 4, 5, 6, 7, 8]
+            };
+
+            var opts = {
+                BatchSize: 300
+            };
+
+            var props = {
+                QueryAllAccounts: false
+            };
+
+            while (moreData) {
+
+                moreData = false;
+
+                if (reqID) props.ContinueRequest = reqID;
+
+                var allAutomations = wsprox.retrieve("Automation", cols, filter, opts, props);
+
+                if (allAutomations != null) {
+                    moreData = allAutomations.HasMoreRows;
+                    reqID = allAutomations.RequestID;
+                    for (var i = 0; i < allAutomations.Results.length; i++) {
+                        automations.push(allAutomations.Results[i]);
+                    }
+                }
+            }
+
+            return automations;
+        }
+
+        //Create record for a record in a Target Data Extension (DOES NOT UPSERT)
+        function createRecord(key, aut, status) {
+
+            var customerKey = key;
+
+            var result = wsprox.createItem("DataExtensionObject", {
+                CustomerKey: customerKey,
+                Properties: [
+                    {
+                        Name: "AutomationName",
+                        Value: aut
+                    },
+                    {
+                        Name: "Status",
+                        Value: status
+                    }
+                ]
+            });
+        }
+
+        //Create each Record for an Automation with its Name and Status in the Automations Data Extension (DOES NOT UPSERT)
+        function createAutRecords() {
+
+            var dataExtensionKey = "C9E05A70-7486-45D8-A9E0-1DDCE7EB7717";
+
+            for (var i = 0; i < autNames.length; i++) {
+                var autName = autNames[i].Name,
+                    status = autNames[i].Status,
+                    automationStatus = "";
+
+                switch (status) {
+                    case -1:
+                        automationStatus = "Error";
+                        break;
+
+                    case 0:
+                        automationStatus = "Building Error";
+                        break;
+
+                    case 1:
+                        automationStatus = "Building";
+                        break;
+
+                    case 2:
+                        automationStatus = "Ready";
+                        break;
+
+                    case 3:
+                        automationStatus = "Running";
+                        break;
+
+                    case 4:
+                        automationStatus = "Paused";
+                        break;
+
+                    case 5:
+                        automationStatus = "Stopped";
+                        break;
+
+                    case 6:
+                        automationStatus = "Scheduled";
+                        break;
+
+                    case 7:
+                        automationStatus = "Awaiting Trigger";
+                        break;
+
+                    case 8:
+                        automationStatus = "Inactive Trigger";
+                        break;
+
+                    default:
+                        automationStatus = "Status Not Available";
+                        break;
+                }
+
+                var creatRec = createRecord(dataExtensionKey, autName, automationStatus);
+                Write(autName + '<br />' + status + '<br />' + '<br />');
+            }
+        }
+
+        //Function to Upsert Record in a Data Extension (Used for Non-sendable context i.e. Landing Page)
+        function upsertRecord() {
+
+            for (var i = 0; i < autNames.length; i++) {
+                var autName = autNames[i].Name,
+                    status = autNames[i].Status,
+                    automationStatus = "";
+
+                switch (status) {
+                    case -1:
+                        automationStatus = "Error";
+                        break;
+
+                    case 0:
+                        automationStatus = "Building Error";
+                        break;
+
+                    case 1:
+                        automationStatus = "Building";
+                        break;
+
+                    case 2:
+                        automationStatus = "Ready";
+                        break;
+
+                    case 3:
+                        automationStatus = "Running";
+                        break;
+
+                    case 4:
+                        automationStatus = "Paused";
+                        break;
+
+                    case 5:
+                        automationStatus = "Stopped";
+                        break;
+
+                    case 6:
+                        automationStatus = "Scheduled";
+                        break;
+
+                    case 7:
+                        automationStatus = "Awaiting Trigger";
+                        break;
+
+                    case 8:
+                        automationStatus = "Inactive Trigger";
+                        break;
+
+                    default:
+                        automationStatus = "Status Not Available";
+                        break;
+                }
+                    rows = Platform.Function.UpsertData("TEST Noah DE SSJS - Retrieve Automations", ["AutomationName"], [autName], ["Status"], [automationStatus]);
+
+                    Write(autName + '<br />' + status + '<br />' + '<br />');
+            }
+        }
+    </script>
+
+    <p>
+    </p>
+
+</body>
+
+</html>
