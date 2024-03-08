@@ -1,7 +1,7 @@
 <html>
 
 <body>
-    <script runat="server" language="Javascript"> //For Demo Purposes. Comment
+    <script runat="server" language="Javascript">
         Platform.Load("core", "1.1.1");
 
         var wsprox = new Script.Util.WSProxy();
@@ -191,7 +191,7 @@
                 }
                     rows = Platform.Function.UpsertData("TEST Noah DE SSJS - Retrieve Automations", ["AutomationName"], [autName], ["Status"], [automationStatus]);
 
-                    Write(autName + '<br />' + status + '<br />' + '<br />');
+                    Write(autName + '<br />' + automationStatus + '<br />' + '<br />');
             }
         }
     </script>
