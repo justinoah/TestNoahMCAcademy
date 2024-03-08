@@ -7,31 +7,12 @@
 
 <body>
     %%[
-    SET @origin = HTTPRequestHeader("Referer")
-    SET @pattern = "^(https:\/\/mc\.s7\.)exacttarget\.com(\/cloud\/#app\/CloudPages\/).*"
-    SET @match = RegExMatch(@origin, @pattern, 1)
-    ]%%
-    <script runat=server>
-        Platform.Load("core", "1");
-        var MATCH = Variable.GetValue("@match");
-        if (!MATCH) { MATCH = null }
-        HTTPHeader.SetValue("Access-Control-Allow-Methods", "POST");
-        HTTPHeader.SetValue("Access-Control-Allow-Origin", MATCH);
-        Platform.Response.SetResponseHeader("Strict-Transport-Security", "max-age=200");
-        Platform.Response.SetResponseHeader("X-XSS-Protection", "1; mode=block");
-        Platform.Response.SetResponseHeader("X-Frame-Options", "Deny");
-        Platform.Response.SetResponseHeader("X-Content-Type-Options", "nosniff");
-        Platform.Response.SetResponseHeader("Referrer-Policy", "strict-origin-when-cross-origin");
-        Platform.Response.SetResponseHeader("Content-Security-Policy", "default-src 'self'"); 
-    </script>
-    %%[
-
-    IF LENGTH(@match) > 0 THEN
-
-    /* DO SOMETHING */
-
-    ENDIF
-
+    /*Check for referrer domain*/
+     
+    SET @referrer = HTTPRequestHeader("Referer")
+    IF indexOf(@referrer, "https://mc.s7.exacttarget.com/cloud/#app/CloudPages/") != "1" AND
+    indexOf(@referrer, "https://cloud.YOURDOMAIN.de/") != "1" AND indexOf(@referrer, "https://mc.s10.exacttarget.com/") != "1"
+    THEN Redirect("https://google.com") ENDIF
     ]%%
 </body>
 
