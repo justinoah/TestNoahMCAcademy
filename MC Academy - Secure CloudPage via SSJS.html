@@ -8,7 +8,7 @@
 <body>
     %%[
     SET @origin = HTTPRequestHeader("Referer")
-    SET @pattern = "^(https:\/\/(.*\.)?((myawesomeform)\.com))($|\/)"
+    SET @pattern = "^https:\/\/mc\.s7\.exacttarget\.com\/cloud\/#app\/CloudPages\/.*"
     SET @match = RegExMatch(@origin, @pattern, 1)
     ]%%
     <script runat=server>
